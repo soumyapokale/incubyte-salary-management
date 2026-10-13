@@ -3,6 +3,8 @@ package com.incubyte.salary_management.repository;
 import com.incubyte.salary_management.constants.EmployeeSql;
 import com.incubyte.salary_management.entity.Employee;
 
+import com.incubyte.salary_management.projection.CountrySalarySummary;
+import com.incubyte.salary_management.projection.JobTitleSalarySummary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,6 +28,14 @@ public interface EmployeeRepository
     boolean existsByEmployeeCode(String employeeCode);
 
     boolean existsByEmail(String email);
+
+    @Query(value = EmployeeSql.COUNTRY_SALARY_SUMMARY, nativeQuery = true)
+    List<CountrySalarySummary> getCountrySalarySummary();
+
+    @Query(value = EmployeeSql.JOB_TITLE_SALARY_SUMMARY, nativeQuery = true)
+    List<JobTitleSalarySummary> getJobTitleSalarySummary(
+            @Param("country") String country
+    );
 
     @Query(
             value = EmployeeSql.SEARCH_EMPLOYEES,
