@@ -33,6 +33,23 @@ export class EmployeeService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'http://localhost:8080/api/employees';
 
+
+  updateSalary(
+    id: number,
+    salary: number,
+    currency: string,
+    effectiveDate: string
+  ): Observable<Employee> {
+    return this.http.put<Employee>(
+      `${this.apiUrl}/${id}/salary`,
+      {
+        salary,
+        currency,
+        effectiveDate
+      }
+    );
+  }
+
   getEmployees(
     page: number = 0,
     size: number = 10,

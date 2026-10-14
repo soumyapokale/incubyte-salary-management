@@ -13,6 +13,34 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(
+            org.springframework.web.bind.MethodArgumentNotValidException.class
+    )
+    public ResponseEntity<Map<String, String>> handleValidationErrors(
+            org.springframework.web.bind.MethodArgumentNotValidException exception) {
+
+        String message = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .findFirst()
+                .orElse("Invalid request");
+
+        return ResponseEntity.badRequest()
+                .body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(
+            org.springframework.web.bind.MissingServletRequestParameterException.class
+    )
+    public ResponseEntity<Map<String, String>> handleMissingParameter(
+            org.springframework.web.bind.MissingServletRequestParameterException exception) {
+
+        return ResponseEntity.badRequest().body(
+                Map.of("error", "Required parameter is missing: "
+                        + exception.getParameterName())
+        );
+    }
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEmployeeNotFound(
             EmployeeNotFoundException exception) {

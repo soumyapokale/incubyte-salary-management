@@ -1,5 +1,6 @@
 package com.incubyte.salary_management.controller;
 
+import com.incubyte.salary_management.DTO.EmployeeCountsResponse;
 import com.incubyte.salary_management.entity.Employee;
 import com.incubyte.salary_management.service.EmployeeService;
 
@@ -47,6 +48,14 @@ public class EmployeeController {
                 search, country, department, pageable
         );
     }
+
+
+    @GetMapping("/employee-counts")
+    public EmployeeCountsResponse getEmployeeCounts() {
+        return employeeService.getEmployeeCounts();
+    }
+
+
 
     @GetMapping("/{id}")
     public Employee getEmployeeById(@PathVariable Long id) {

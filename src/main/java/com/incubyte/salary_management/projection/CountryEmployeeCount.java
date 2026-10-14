@@ -1,4 +1,9 @@
+
 package com.incubyte.salary_management.projection;
 
-public class CountryEmployeeCount {
+public interface CountryEmployeeCount {
+
+    String getCountry();
+
+    Long getEmployeeCount();
 }

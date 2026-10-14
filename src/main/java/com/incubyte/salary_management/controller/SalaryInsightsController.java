@@ -3,7 +3,7 @@ package com.incubyte.salary_management.controller;
 
 import com.incubyte.salary_management.projection.CountrySalarySummary;
 import com.incubyte.salary_management.projection.JobTitleSalarySummary;
-import com.incubyte.salary_management.repository.EmployeeRepository;
+import com.incubyte.salary_management.service.SalaryInsightsService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,20 +16,23 @@ import java.util.List;
 @RequestMapping("/api/insights")
 public class SalaryInsightsController {
 
-    private final EmployeeRepository employeeRepository;
+    private final SalaryInsightsService salaryInsightsService;
 
-    public SalaryInsightsController(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
+    public SalaryInsightsController(
+            SalaryInsightsService salaryInsightsService) {
+        this.salaryInsightsService = salaryInsightsService;
     }
 
+    // GET /api/insights/country-salaries
     @GetMapping("/country-salaries")
     public List<CountrySalarySummary> getCountrySalarySummary() {
-        return employeeRepository.getCountrySalarySummary();
+        return salaryInsightsService.getCountrySalarySummary();
     }
 
+    // GET /api/insights/job-title-salaries?country=India
     @GetMapping("/job-title-salaries")
     public List<JobTitleSalarySummary> getJobTitleSalarySummary(
             @RequestParam String country) {
-        return employeeRepository.getJobTitleSalarySummary(country);
+        return salaryInsightsService.getJobTitleSalarySummary(country);
     }
 }

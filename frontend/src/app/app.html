@@ -4,9 +4,33 @@
     <h2>Salary<span>Flow</span></h2>
 
     <p class="menu-label">WORKSPACE</p>
-    <a class="nav-item active">▦ &nbsp; Dashboard</a>
-    <a class="nav-item">♙ &nbsp; Employees</a>
-    <a class="nav-item">₹ &nbsp; Salary Insights</a>
+
+    <a
+      class="nav-item"
+      [class.active]="activeView === 'dashboard'"
+      href="javascript:void(0)"
+      (click)="setView('dashboard')"
+    >
+      ▦ &nbsp; Dashboard
+    </a>
+
+    <a
+      class="nav-item"
+      [class.active]="activeView === 'dashboard'"
+      href="javascript:void(0)"
+      (click)="setView('dashboard')"
+    >
+      ♙ &nbsp; Employees
+    </a>
+
+    <a
+      class="nav-item"
+      [class.active]="activeView === 'insights'"
+      href="javascript:void(0)"
+      (click)="setView('insights')"
+    >
+      ₹ &nbsp; Salary Insights
+    </a>
 
     <div class="sidebar-footer">
       <div class="avatar">HR</div>
@@ -21,11 +45,14 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">WORKSPACE / OVERVIEW</p>
-        <h1>Employee Management</h1>
+        <h1>
+          {{ activeView === 'dashboard' ? 'Employee Management' : 'Salary Insights' }}
+        </h1>
       </div>
       <span class="status">● System Online</span>
     </header>
 
+    @if (activeView === 'dashboard') {
     <section class="welcome">
       <div>
         <p class="eyebrow">EMPLOYEE COMPENSATION</p>
@@ -85,35 +112,32 @@
           }
         </select>
 
-        <button type="submit">Search</button>
+        <button type="submit" [disabled]="loading">Search</button>
 
         <button
           type="button"
           class="secondary-button"
+          [disabled]="loading"
           (click)="clearFilters()"
         >
           Clear
         </button>
       </form>
 
-      <!-- Temporary debugging information -->
-      <div class="message">
-        <strong>Debug information</strong>
-        <p>Loading: {{ loading }}</p>
-        <p>Employee count: {{ employees.length }}</p>
-        <p>Total matching employees: {{ totalElements }}</p>
-      </div>
-
       @if (errorMessage) {
       <div class="error-message">{{ errorMessage }}</div>
       <button type="button" (click)="loadEmployees()">Retry</button>
+      }
+
+      @if (salaryMessage) {
+      <p class="message">{{ salaryMessage }}</p>
       }
 
       @if (employees.length === 0 && loading) {
       <p class="message">Loading employees...</p>
       } @else if (employees.length === 0 && !errorMessage) {
       <p class="message">No employees found for the selected filters.</p>
-      } @else {
+      } @else if (employees.length > 0) {
       <div class="table-wrapper">
         <table>
           <thead>
@@ -124,6 +148,7 @@
             <th>Job Title</th>
             <th>Salary</th>
             <th>Effective Date</th>
+            <th>Actions</th>
           </tr>
           </thead>
 
@@ -146,6 +171,14 @@
               {{ employee.currency }}
             </td>
             <td>{{ employee.effectiveDate }}</td>
+            <td>
+              <button
+                type="button"
+                (click)="openSalaryEditor(employee)"
+              >
+                Edit Salary
+              </button>
+            </td>
           </tr>
           }
           </tbody>
@@ -153,10 +186,10 @@
       </div>
 
       <div class="pagination">
-          <span>
-            Showing {{ currentPage * pageSize + 1 }}–{{ currentPage * pageSize + employees.length }}
-            of {{ totalElements | number }}
-          </span>
+            <span>
+              Showing {{ currentPage * pageSize + 1 }}–{{ currentPage * pageSize + employees.length }}
+              of {{ totalElements | number }}
+            </span>
 
         <div class="page-buttons">
           <button
@@ -182,5 +215,214 @@
       </div>
       }
     </section>
+
+    <section
+      class="content-card salary-editor"
+      [hidden]="!selectedEmployee"
+    >
+      @if (selectedEmployee; as employee) {
+      <div class="section-heading">
+        <div>
+          <h2>Edit Salary</h2>
+          <p>Update the employee's compensation details.</p>
+        </div>
+      </div>
+
+      <p>
+        Employee:
+        <strong>{{ employee.firstName }} {{ employee.lastName }}</strong>
+        ({{ employee.employeeCode }})
+      </p>
+
+      <p>
+        Current salary:
+        <strong>
+          {{ employee.salary | number:'1.2-2' }} {{ employee.currency }}
+        </strong>
+      </p>
+
+      <form class="salary-form" (ngSubmit)="saveSalary()">
+        <label for="newSalary">
+          New salary ({{ employee.currency }})
+        </label>
+
+        <input
+          id="newSalary"
+          name="newSalary"
+          type="number"
+          [(ngModel)]="newSalary"
+          min="0.01"
+          step="0.01"
+          placeholder="Enter new salary"
+          required
+        />
+
+        <label for="effectiveDate">Effective date</label>
+
+        <input
+          id="effectiveDate"
+          name="effectiveDate"
+          type="date"
+          [(ngModel)]="effectiveDate"
+          required
+        />
+
+        @if (salaryError) {
+        <p class="error-message">{{ salaryError }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="salarySaving">
+            {{ salarySaving ? 'Saving...' : 'Save Salary' }}
+          </button>
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="salarySaving"
+            (click)="closeSalaryEditor()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+      }
+    </section>
+    } @else {
+    <section class="welcome insights-welcome">
+      <div>
+        <p class="eyebrow">COMPENSATION ANALYTICS</p>
+        <h2>Understand your salary distribution</h2>
+        <p>Compare average, minimum and maximum salaries across countries and job titles.</p>
+      </div>
+      <div class="welcome-icon">₹</div>
+    </section>
+
+    @if (insightsError) {
+    <div class="content-card">
+      <p class="error-message">{{ insightsError }}</p>
+      <button type="button" (click)="loadCountryInsights()">Retry country insights</button>
+      <button type="button" (click)="loadJobTitleInsights()">Retry job-title insights</button>
+    </div>
+    }
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p>Countries Covered</p>
+        <h2>{{ countryInsights.length }}</h2>
+        <small>Country salary summaries</small>
+      </article>
+
+      <article class="stat-card">
+        <p>Employees Analysed</p>
+        <h2>
+          {{ countryInsights.length ? countryInsights[0].employeeCount * countryInsights.length : 0 | number }}
+        </h2>
+        <small>Across all countries</small>
+      </article>
+
+      <article class="stat-card">
+        <p>Job Titles</p>
+        <h2>{{ jobTitleInsights.length }}</h2>
+        <small>{{ insightsCountry }} salary breakdown</small>
+      </article>
+    </section>
+
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <h2>Country Salary Overview</h2>
+          <p>Compare salary ranges and employee counts by country.</p>
+        </div>
+      </div>
+
+      @if (countryInsights.length > 0) {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+          <tr>
+            <th>Country</th>
+            <th>Employees</th>
+            <th>Average Salary</th>
+            <th>Minimum Salary</th>
+            <th>Maximum Salary</th>
+          </tr>
+          </thead>
+          <tbody>
+          @for (item of countryInsights; track item.country) {
+          <tr>
+            <td><strong>{{ item.country }}</strong></td>
+            <td>{{ item.employeeCount | number }}</td>
+            <td class="salary">
+              {{ item.averageSalary | number:'1.2-2' }} {{ item.currency }}
+            </td>
+            <td>
+              {{ item.minSalary | number:'1.2-2' }} {{ item.currency }}
+            </td>
+            <td>
+              {{ item.maxSalary | number:'1.2-2' }} {{ item.currency }}
+            </td>
+          </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+      <p class="message">Loading country salary insights...</p>
+      }
+    </section>
+
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <h2>Average Salary by Job Title</h2>
+          <p>Choose a country to compare average salaries for different roles.</p>
+        </div>
+      </div>
+
+      <div class="insights-filter">
+        <label for="insightsCountry">Country</label>
+        <select
+          id="insightsCountry"
+          name="insightsCountry"
+          [(ngModel)]="insightsCountry"
+          (ngModelChange)="onInsightsCountryChange()"
+        >
+          @for (item of countries; track item) {
+          <option [value]="item">{{ item }}</option>
+          }
+        </select>
+      </div>
+
+      @if (insightsLoading) {
+      <p class="message">Loading job-title insights...</p>
+      } @else if (jobTitleInsights.length > 0) {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+          <tr>
+            <th>Job Title</th>
+            <th>Employees</th>
+            <th>Average Salary</th>
+          </tr>
+          </thead>
+          <tbody>
+          @for (item of jobTitleInsights; track item.jobTitle) {
+          <tr>
+            <td><strong>{{ item.jobTitle }}</strong></td>
+            <td>{{ item.employeeCount | number }}</td>
+            <td class="salary">
+              {{ item.averageSalary | number:'1.2-2' }} {{ item.currency }}
+            </td>
+          </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+      <p class="message">No job-title salary data is available for this country.</p>
+      }
+    </section>
+    }
   </main>
 </div>

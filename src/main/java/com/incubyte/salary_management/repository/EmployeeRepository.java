@@ -3,7 +3,9 @@ package com.incubyte.salary_management.repository;
 import com.incubyte.salary_management.constants.EmployeeSql;
 import com.incubyte.salary_management.entity.Employee;
 
+import com.incubyte.salary_management.projection.CountryEmployeeCount;
 import com.incubyte.salary_management.projection.CountrySalarySummary;
+import com.incubyte.salary_management.projection.DepartmentEmployeeCount;
 import com.incubyte.salary_management.projection.JobTitleSalarySummary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,13 @@ public interface EmployeeRepository
     Optional<Employee> findByEmployeeCode(String employeeCode);
 
     boolean existsByEmployeeCode(String employeeCode);
+
+
+    @Query(value = EmployeeSql.EMPLOYEE_COUNT_BY_COUNTRY, nativeQuery = true)
+    List<CountryEmployeeCount> getEmployeeCountByCountry();
+
+    @Query(value = EmployeeSql.EMPLOYEE_COUNT_BY_DEPARTMENT, nativeQuery = true)
+    List<DepartmentEmployeeCount> getEmployeeCountByDepartment();
 
     boolean existsByEmail(String email);
 

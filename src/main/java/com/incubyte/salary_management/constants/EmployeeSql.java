@@ -31,6 +31,24 @@ public final class EmployeeSql {
     ORDER BY job_title
     """;
 
+    public static final String EMPLOYEE_COUNT_BY_COUNTRY = """
+    SELECT
+        country AS country,
+        COUNT(*) AS "employeeCount"
+    FROM employees
+    GROUP BY country
+    ORDER BY country
+    """;
+
+    public static final String EMPLOYEE_COUNT_BY_DEPARTMENT = """
+    SELECT
+        department AS department,
+        COUNT(*) AS "employeeCount"
+    FROM employees
+    GROUP BY department
+    ORDER BY department
+    """;
+
     public static final String SEARCH_EMPLOYEES = """
             SELECT *
             FROM employees e
