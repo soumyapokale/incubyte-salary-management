@@ -1,0 +1,186 @@
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <h2>Salary<span>Flow</span></h2>
+
+    <p class="menu-label">WORKSPACE</p>
+    <a class="nav-item active">▦ &nbsp; Dashboard</a>
+    <a class="nav-item">♙ &nbsp; Employees</a>
+    <a class="nav-item">₹ &nbsp; Salary Insights</a>
+
+    <div class="sidebar-footer">
+      <div class="avatar">HR</div>
+      <div>
+        <strong>HR Manager</strong>
+        <small>Salary Management</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">WORKSPACE / OVERVIEW</p>
+        <h1>Employee Management</h1>
+      </div>
+      <span class="status">● System Online</span>
+    </header>
+
+    <section class="welcome">
+      <div>
+        <p class="eyebrow">EMPLOYEE COMPENSATION</p>
+        <h2>Manage your workforce</h2>
+        <p>Search employees, review compensation and explore employee records.</p>
+      </div>
+      <div class="welcome-icon">₹</div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p>Total Employees</p>
+        <h2>{{ totalElements | number }}</h2>
+        <small>Matching current filters</small>
+      </article>
+
+      <article class="stat-card">
+        <p>Countries</p>
+        <h2>5</h2>
+        <small>Local currencies supported</small>
+      </article>
+
+      <article class="stat-card">
+        <p>Current Page</p>
+        <h2>{{ totalPages ? currentPage + 1 : 0 }} / {{ totalPages }}</h2>
+        <small>{{ pageSize }} employees per page</small>
+      </article>
+    </section>
+
+    <section class="content-card">
+      <div class="section-heading">
+        <div>
+          <h2>Employees</h2>
+          <p>Find employees by name or employee ID.</p>
+        </div>
+      </div>
+
+      <form class="filters" (ngSubmit)="applyFilters()">
+        <input
+          type="text"
+          name="search"
+          [(ngModel)]="search"
+          placeholder="Search name or employee ID"
+        />
+
+        <select name="country" [(ngModel)]="country">
+          <option value="">All countries</option>
+          @for (item of countries; track item) {
+          <option [value]="item">{{ item }}</option>
+          }
+        </select>
+
+        <select name="department" [(ngModel)]="department">
+          <option value="">All departments</option>
+          @for (item of departments; track item) {
+          <option [value]="item">{{ item }}</option>
+          }
+        </select>
+
+        <button type="submit">Search</button>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="clearFilters()"
+        >
+          Clear
+        </button>
+      </form>
+
+      <!-- Temporary debugging information -->
+      <div class="message">
+        <strong>Debug information</strong>
+        <p>Loading: {{ loading }}</p>
+        <p>Employee count: {{ employees.length }}</p>
+        <p>Total matching employees: {{ totalElements }}</p>
+      </div>
+
+      @if (errorMessage) {
+      <div class="error-message">{{ errorMessage }}</div>
+      <button type="button" (click)="loadEmployees()">Retry</button>
+      }
+
+      @if (employees.length === 0 && loading) {
+      <p class="message">Loading employees...</p>
+      } @else if (employees.length === 0 && !errorMessage) {
+      <p class="message">No employees found for the selected filters.</p>
+      } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Country</th>
+            <th>Job Title</th>
+            <th>Salary</th>
+            <th>Effective Date</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          @for (employee of employees; track employee.id) {
+          <tr>
+            <td>
+              <strong>
+                {{ employee.firstName }} {{ employee.lastName }}
+              </strong>
+              <small class="employee-code">
+                {{ employee.employeeCode }}
+              </small>
+            </td>
+            <td>{{ employee.department }}</td>
+            <td>{{ employee.country }}</td>
+            <td>{{ employee.jobTitle }}</td>
+            <td class="salary">
+              {{ employee.salary | number:'1.2-2' }}
+              {{ employee.currency }}
+            </td>
+            <td>{{ employee.effectiveDate }}</td>
+          </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+          <span>
+            Showing {{ currentPage * pageSize + 1 }}–{{ currentPage * pageSize + employees.length }}
+            of {{ totalElements | number }}
+          </span>
+
+        <div class="page-buttons">
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="currentPage === 0 || loading"
+            (click)="goToPage(currentPage - 1)"
+          >
+            Previous
+          </button>
+
+          <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="currentPage + 1 >= totalPages || loading"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      }
+    </section>
+  </main>
+</div>
